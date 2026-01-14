@@ -5,6 +5,7 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
+    "build": "node -e \"console.log('No build step for this package.')\"",
     "start": "node src/index.js"
   },
   "engines": {

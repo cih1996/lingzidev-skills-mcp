@@ -4,6 +4,10 @@ import os from "node:os";
 import crypto from "node:crypto";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import {
+  CallToolRequestSchema,
+  ListToolsRequestSchema
+} from "@modelcontextprotocol/sdk/types.js";
 
 const server = new Server(
   {
@@ -112,7 +116,7 @@ function filterRules(rules, filters) {
   });
 }
 
-server.setRequestHandler("tools/list", async () => ({
+server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
     {
       name: "record_rule",
@@ -195,7 +199,7 @@ server.setRequestHandler("tools/list", async () => ({
   ]
 }));
 
-server.setRequestHandler("tools/call", async (request) => {
+server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params ?? {};
   if (!name) {
     throw new Error("Missing tool name");
