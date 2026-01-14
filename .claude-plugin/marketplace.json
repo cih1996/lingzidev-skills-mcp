@@ -1,0 +1,18 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "skills-and-mcps",
+  "version": "1.0.0",
+  "description": "Personal collection of Codex skills and MCP servers.",
+  "owner": {
+    "name": "cih1996",
+    "email": "you@example.com"
+  },
+  "plugins": [
+    {
+      "name": "project-norms",
+      "description": "Capture and apply project-wide norms scoped by framework (e.g. Vue/React).",
+      "source": "./skills/project-norms",
+      "category": "development"
+    }
+  ]
+}
