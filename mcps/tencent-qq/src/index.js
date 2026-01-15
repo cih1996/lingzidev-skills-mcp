@@ -7,6 +7,7 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import axios from "axios";
+import https from "https";
 
 // Helper function to calculate g_tk for QZone
 function calculateGTK(p_skey) {
@@ -235,28 +236,51 @@ class QQServer {
       },
       data: method === 'POST' ? data : undefined,
       params: method === 'GET' ? data : undefined,
-      timeout: 30000
+      timeout: 30000,
+      proxy: false  // Disable proxy to avoid connection issues
     };
 
     try {
       const response = await axios(config);
       const result = response.data;
 
-      if (result.status === "ok" && result.retcode === 0) {
+      // Handle OneBot v11/v12 format: check retcode (status field is optional)
+      if (result && typeof result === 'object' && 'retcode' in result) {
+        if (result.retcode === 0) {
+          return {
+            success: true,
+            content: result.data,
+            error: null
+          };
+        } else {
+          const errorMsg = result.message || result.wording || "API returned error";
+          return {
+            success: false,
+            content: null,
+            error: `API Error: ${errorMsg} (retcode: ${result.retcode})`
+          };
+        }
+      }
+
+      // If HTTP status is 200 but no retcode field, treat as success
+      if (response.status === 200) {
         return {
           success: true,
-          content: result.data,
+          content: result,
           error: null
         };
-      } else {
-        const errorMsg = result.message || result.wording || "API returned error";
-        return {
-          success: false,
-          content: null,
-          error: `API Error: ${errorMsg}`
-        };
       }
+
+      // Otherwise it's an error
+      return {
+        success: false,
+        content: null,
+        error: `Unexpected response format`
+      };
     } catch (error) {
+      if (error.response) {
+        throw new Error(`Request failed: ${error.message} (Status: ${error.response.status})`);
+      }
       throw new Error(`Request failed: ${error.message}`);
     }
   }
@@ -340,6 +364,12 @@ class QQServer {
     
     const g_tk = calculateGTK(p_skey);
     
+    // Debug logging
+    console.error(`[QZone Debug] HostUIN: ${hostuin}, g_tk: ${g_tk}`);
+    // Mask sensitive parts of cookie for logging
+    const maskedCookies = cookiesStr.replace(/(p_skey=)[^;]+/, '$1***');
+    console.error(`[QZone Debug] Cookies (masked): ${maskedCookies}`);
+
     // 3. Publish
     const qzoneUrl = `https://user.qzone.qq.com/proxy/domain/taotao.qzone.qq.com/cgi-bin/emotion_cgi_publish_v6?&g_tk=${g_tk}`;
     
@@ -362,6 +392,11 @@ class QQServer {
     formData.append('format', 'fs');
     formData.append('qzreferrer', `https://user.qzone.qq.com/${hostuin}`);
 
+    const agent = new https.Agent({
+      rejectUnauthorized: false,
+      keepAlive: true
+    });
+
     try {
       const response = await axios.post(qzoneUrl, formData, {
         headers: {
@@ -369,7 +404,11 @@ class QQServer {
           'Cookie': cookiesStr,
           'Referer': `https://user.qzone.qq.com/${hostuin}`,
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        }
+        },
+        httpsAgent: agent,
+        maxBodyLength: Infinity,
+        maxContentLength: Infinity,
+        proxy: false  // Disable proxy to avoid connection issues with QZone
       });
       
       // Check status code (API returns 200 on success usually, content might need inspection but Python code just checked status)
@@ -384,7 +423,13 @@ class QQServer {
         }]
       };
     } catch (error) {
-      throw new Error(`QZone Publish failed: ${error.message}`);
+      console.error(`[QZone Error] ${error.message}`);
+      if (error.code) console.error(`[QZone Error Code] ${error.code}`);
+      if (error.response) {
+         console.error(`[QZone Error Response] Status: ${error.response.status}`);
+         console.error(`[QZone Error Response] Data: ${JSON.stringify(error.response.data)}`);
+      }
+      throw new Error(`QZone Publish failed: ${error.message} (Code: ${error.code || 'unknown'})`);
     }
   }
 
