@@ -11,28 +11,10 @@ Repository layout for Codex skills and MCP servers.
 - `.claude-plugin/marketplace.json`
   - Marketplace manifest for skill discovery via GitHub URL
 
-## CC Switch / skill discovery
+## MCP Servers Overview
 
-If a tool expects a GitHub URL with a marketplace manifest, point it at this repo. The manifest lives at `.claude-plugin/marketplace.json` and references `skills/` entries.
-
-## MCP configuration example
-
-```json
-{
-  "mcpServers": {
-    "project-norms": {
-      "command": "node",
-      "args": ["/absolute/path/to/repo/mcps/project-norms/src/index.js"],
-      "env": {
-        "RULES_STORE_PATH": "/Users/cih1996/.mcp-data/project-norms/rules.json"
-      }
-    }
-  }
-}
-```
-
-
-
-
-### Using Demo
-![Using Demo](media/gifs/using-demo.gif)
+| MCP Server | Description | Configuration |
+| :--- | :--- | :--- |
+| [project-norms](mcps/project-norms/README.md) | Captures and applies project-wide norms scoped by framework. | [View Config](mcps/project-norms/README.md#configuration) |
+| [tencent-qq](mcps/tencent-qq/README.md) | Provides QQ integration via NapCatQQ (messaging, QZone). | [View Config](mcps/tencent-qq/README.md#configuration) |
+| [x](mcps/x/README.md) | Integrates with X (Twitter) for timeline reading and posting. | [View Config](mcps/x/README.md#configuration) |
