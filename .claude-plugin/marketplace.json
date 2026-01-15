@@ -13,6 +13,12 @@
       "description": "Capture and apply project-wide norms scoped by framework (e.g. Vue/React).",
       "source": "./skills/project-norms",
       "category": "development"
+    },
+    {
+      "name": "video-to-gif",
+      "description": "Automatically convert videos in `media/videos` to GIFs and update README.md.",
+      "source": "./skills/video-to-gif",
+      "category": "automation"
     }
   ]
 }
