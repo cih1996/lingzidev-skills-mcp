@@ -43,3 +43,9 @@ venv/
 .idea/
 .vscode/
 *.swp
+
+media/videos/
+
+.trae/
+CLAUDE.md
+AGENTS.md

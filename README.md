@@ -30,3 +30,9 @@ If a tool expects a GitHub URL with a marketplace manifest, point it at this rep
   }
 }
 ```
+
+
+
+
+### Using Demo
+![Using Demo](media/gifs/using-demo.gif)
